@@ -1,4 +1,4 @@
-import os, smtplib
+import os
 from datetime import date
 from flask import Flask, abort, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap5
@@ -227,17 +227,6 @@ def contact():
     form=ContactForm()
     msg_sent=None
     if form.validate_on_submit():
-        name = form.name.data
-        email = form.email.data
-        message = form.meassage.data
-        with smtplib.SMTP("smtp.office365.com") as connection:
-            connection.starttls()
-            connection.login(user=sender_email, password=password)
-            connection.sendmail(
-                from_addr=sender_email,
-                to_addrs=receiver_email,
-                msg=f"Subject:Website user message \n\nName: {name} \nEmail: {email} \nMessage: {message}"
-            )
         msg_sent=True
     return render_template("contact.html", logged_in=current_user.is_authenticated, form=form, msg_sent=msg_sent)
 
