@@ -137,7 +137,6 @@ def get_all_posts():
                            name=name, admin=admin)
 
 
-# TODO: Allow logged-in users to comment on posts
 @app.route("/post/<int:post_id>", methods=["POST", "GET"])
 def show_post(post_id):
     form = CommentForm()
