@@ -147,6 +147,7 @@ def show_post(post_id):
     form = CommentForm()
     requested_post = BlogPost.query.get_or_404(post_id)
     admin = False
+    name = None
     if current_user.is_authenticated:
         name = current_user.name
         if current_user.id == 1:
