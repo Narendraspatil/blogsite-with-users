@@ -1,4 +1,4 @@
-import os
+import os, smtplib
 from datetime import date
 from flask import Flask, abort, render_template, redirect, url_for, flash
 from flask_bootstrap import Bootstrap5
@@ -9,10 +9,14 @@ from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import relationship
-from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm, ContactForm
+
+sender_email = os.environ.get("SENDER_EMAIL")
+password = os.environ.get("PASSWORD")
+receiver_email = os.environ.get("RECEIVER_EMAIL")
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('FLASK_KEY')
+app.config['SECRET_KEY'] = os.environ.get("FLASK_KEY")
 ckeditor = CKEditor(app)
 Bootstrap5(app)
 
@@ -218,10 +222,25 @@ def about():
     return render_template("about.html", logged_in=current_user.is_authenticated)
 
 
-@app.route("/contact")
+@app.route("/contact", methods=["POST", "GET"])
 def contact():
-    return render_template("contact.html", logged_in=current_user.is_authenticated)
+    form=ContactForm()
+    msg_sent=None
+    if form.validate_on_submit():
+        name = form.name.data
+        email = form.email.data
+        message = form.meassage.data
+        with smtplib.SMTP("smtp.office365.com") as connection:
+            connection.starttls()
+            connection.login(user=sender_email, password=password)
+            connection.sendmail(
+                from_addr=sender_email,
+                to_addrs=receiver_email,
+                msg=f"Subject:Website user message \n\nName: {name} \nEmail: {email} \nMessage: {message}"
+            )
+        msg_sent=True
+    return render_template("contact.html", logged_in=current_user.is_authenticated, form=form, msg_sent=msg_sent)
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5002)
+    app.run(debug=False)
